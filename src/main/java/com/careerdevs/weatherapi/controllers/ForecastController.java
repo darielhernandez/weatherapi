@@ -1,6 +1,7 @@
 package com.careerdevs.weatherapi.controllers;
 
 import com.careerdevs.weatherapi.models.Forecast;
+import com.careerdevs.weatherapi.models.ForecastReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
@@ -30,9 +32,13 @@ public class ForecastController {
             Forecast owRes = restTemplate.getForObject(url, Forecast.class);
 
             //generate report
+            assert owRes != null;
+            ForecastReport report = new ForecastReport(owRes);
 
-            return ResponseEntity.ok(owRes);
+            return ResponseEntity.ok(report);
 
+//            }catch (HttpClientErrorException.NotFound e){
+//            return ResponseEntity.status(404).body("City Not Found: " + city);
 
             }catch (Exception e){
             System.out.println(e);
