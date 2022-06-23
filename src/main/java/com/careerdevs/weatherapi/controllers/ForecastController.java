@@ -12,33 +12,36 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URL;
+
 @RestController
 @RequestMapping("/api/forecast")
 public class ForecastController {
 
     @Autowired
     private Environment env;
-
     private final String BASE_URL = "https://api.openweathermap.org/data/2.5/forecast";
 
-    @GetMapping("/city/{city}")
-    public ResponseEntity<?> getForecastByCity (RestTemplate restTemplate, @PathVariable String city){
+    @GetMapping("/city/{cityName}")
+    public ResponseEntity<?> getForecastByCity (RestTemplate restTemplate, @PathVariable String cityName){
+
         try{
             String units= "imperial";
             String apiKey= env.getProperty("OW_API_KEY");
-            String queryString= "?q=" + city + "&units=" + units + "&appid=" +  apiKey;
+            String queryString= "?q=" + cityName + "&units=" + units + "&appid=" +  apiKey;
             String url = BASE_URL +queryString;
-
             Forecast owRes = restTemplate.getForObject(url, Forecast.class);
+
 
             //generate report
             assert owRes != null;
             ForecastReport report = new ForecastReport(owRes);
 
-            return ResponseEntity.ok(report);
+//            return ResponseEntity.ok(report);
+            return ResponseEntity.ok(owRes);
 
-//            }catch (HttpClientErrorException.NotFound e){
-//            return ResponseEntity.status(404).body("City Not Found: " + city);
+            }catch (HttpClientErrorException.NotFound e){
+            return ResponseEntity.status(404).body("City Not Found: " + cityName);
 
             }catch (Exception e){
             System.out.println(e);
