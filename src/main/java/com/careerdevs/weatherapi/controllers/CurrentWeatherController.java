@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @RestController
 @RequestMapping("/api/current")
 public class CurrentWeatherController {
@@ -65,19 +68,43 @@ public class CurrentWeatherController {
     //response entity lets you have a more fine level of control over things like status, data, and headers in your responses
     public ResponseEntity<?> getCurrentWeatherByCityRP (
             RestTemplate restTemplate,
-            @RequestParam String name){
+            @RequestParam String name,
+            @RequestParam(value= "name") String cityName,
+            @RequestParam(defaultValue = "imperial") String units){
 
         try {
-            String units = "imperial";
-//            String city = "providence";
+            ArrayList<String> validationErrors = new ArrayList<>();
+//            Validation- name
+//            name cant be blank
+            if(cityName.trim().equals("")){
+                validationErrors.add("City name required");
+            }
+            else if (!cityName.replaceAll("[^a-zA-z -]", "").equals(cityName)){
+                System.out.println(cityName);
+            System.out.println(cityName.replaceAll("[^a-zA-Z ]", "*"));
+
+//            name should not include special char/num
+            validationErrors.add("City name required");
+            }
+            System.out.println(Arrays.toString(validationErrors.toArray()));
+//            validation- units
+
+
+//
+
+
+            System.out.println("Name: " + cityName + " - Units: " + units);
 
 
             String apiKey = env.getProperty("OW_API_KEY");
-            String queryString = "?q=" + "&appid=" + apiKey + "&units=imperial" + units;
+            String queryString = "?q=" + cityName + "&appid=" + apiKey + "&units=imperial" + units;
             String openWeatherURL = BASE_URL + queryString;
             //            String openWeatherResponse = restTemplate.getForObject(openWeatherURL, String.class);
 
             return ResponseEntity.ok().body("Test request");
+
+        }catch (HttpClientErrorException.NotFound e){// cityName validation
+            return ResponseEntity.status(404).body("City Not Found: " + cityName);
 
         } catch (Exception e){
             System.out.println(e.getMessage());
