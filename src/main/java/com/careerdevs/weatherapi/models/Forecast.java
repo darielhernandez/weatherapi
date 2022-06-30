@@ -62,4 +62,8 @@ public class Forecast {
     public ForecastWeatherData[] getList() {
         return list;
     }
+
+    public ForecastReport createReport (String units){
+        return new ForecastReport(this, units);
+    }
 }

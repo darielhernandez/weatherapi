@@ -35,19 +35,7 @@ public class CurrentWeatherController {
 
             assert owRes != null;
 
-            CurrentWeatherReport report = new CurrentWeatherReport(
-                    owRes.getName(),
-                    owRes.getCoord(),
-                    owRes.getMain(),
-                    owRes.getWeather()[0],
-                    units
-
-            );
-
-            System.out.println(report);
-
-
-            return ResponseEntity.ok(report);
+            return ResponseEntity.ok(owRes.createReport(units));
 
         }catch (HttpClientErrorException.NotFound e){
             return ResponseEntity.status(404).body("City Not Found: " + cityName);
@@ -91,6 +79,7 @@ public class CurrentWeatherController {
                   validationErrors.add("units must be in metric or imperial");
               }
 
+              //if validation fails in any way, return error message(s)
               if(validationErrors.size() !=0){
                   return ResponseEntity.badRequest().body(validationErrors);
               }
@@ -100,8 +89,8 @@ public class CurrentWeatherController {
             String openWeatherURL = BASE_URL + queryString;
 
             CurrentWeather owRes = restTemplate.getForObject(openWeatherURL, CurrentWeather.class);
-
-            return ResponseEntity.ok().body(owRes);
+            assert owRes!=null;
+            return ResponseEntity.ok(owRes.createReport(units));
 
         }catch (HttpClientErrorException.NotFound e){// cityName validation
             return ResponseEntity.status(404).body("City Not Found: " + cityName);

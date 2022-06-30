@@ -12,7 +12,7 @@ public class ForecastReport {
 //    private final ForecastReportEntry[] reports;
     private final ArrayList<ForecastReportEntry> reports;
 
-    public ForecastReport(Forecast forecast) {
+    public ForecastReport(Forecast forecast, String units) {
         cityName= forecast.getCity().getName();
         country= forecast.getCity().getCountry();
         population= forecast.getCity().getPopulation();
@@ -22,7 +22,7 @@ public class ForecastReport {
 
         for (int i = 0; i < forecast.getList().length; i++) {
 //            reports[i] = new ForecastReportEntry(forecast.getList()[i]);
-            reports.add(new ForecastReportEntry(forecast.getList()[i]));
+            reports.add(new ForecastReportEntry(forecast.getList()[i], units));
         }
 
     }
@@ -33,10 +33,11 @@ public class ForecastReport {
         private final String temp;
         private final String percentageOfPrecipitation;
 
-        public ForecastReportEntry(ForecastWeatherData wd) {
+        public ForecastReportEntry(ForecastWeatherData wd, String units) {
             description = wd.getWeather()[0].getMain() + " - " + wd.getWeather()[0].getDescription();
             dateTime= wd.getDateTime();
-            temp = wd.getMain().getTemp() + "°F";
+            temp = wd.getMain().getTemp() + "°" + (units.equals("imperial") ? "F":"C");
+
             percentageOfPrecipitation = (wd.getPop() * 100) + "%";
         }
     }
