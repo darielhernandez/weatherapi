@@ -78,30 +78,30 @@ public class CurrentWeatherController {
 //            name cant be blank
             if(cityName.trim().equals("")){
                 validationErrors.add("City name required");
-            }
-            else if (!cityName.replaceAll("[^a-zA-z -]", "").equals(cityName)){
-                System.out.println(cityName);
-            System.out.println(cityName.replaceAll("[^a-zA-Z ]", "*"));
 
+            } else if (!cityName.replaceAll("[^a-zA-z -]", "").equals(cityName)
+            ){
 //            name should not include special char/num
-            validationErrors.add("City name required");
+            validationErrors.add("Invalid city name");
             }
-            System.out.println(Arrays.toString(validationErrors.toArray()));
+
 //            validation- units
+//            is it metric or imperial
+              if(!units.equals("metric") && !units.equals("imperial")) {
+                  validationErrors.add("units must be in metric or imperial");
+              }
 
-
-//
-
-
-            System.out.println("Name: " + cityName + " - Units: " + units);
-
+              if(validationErrors.size() !=0){
+                  return ResponseEntity.badRequest().body(validationErrors);
+              }
 
             String apiKey = env.getProperty("OW_API_KEY");
             String queryString = "?q=" + cityName + "&appid=" + apiKey + "&units=imperial" + units;
             String openWeatherURL = BASE_URL + queryString;
-            //            String openWeatherResponse = restTemplate.getForObject(openWeatherURL, String.class);
 
-            return ResponseEntity.ok().body("Test request");
+            CurrentWeather owRes = restTemplate.getForObject(openWeatherURL, CurrentWeather.class);
+
+            return ResponseEntity.ok().body(owRes);
 
         }catch (HttpClientErrorException.NotFound e){// cityName validation
             return ResponseEntity.status(404).body("City Not Found: " + cityName);
