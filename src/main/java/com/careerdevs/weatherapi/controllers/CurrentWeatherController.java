@@ -3,6 +3,7 @@ package com.careerdevs.weatherapi.controllers;
 
 import com.careerdevs.weatherapi.models.CurrentWeather;
 import com.careerdevs.weatherapi.models.CurrentWeatherReport;
+import com.careerdevs.weatherapi.validation.WeatherValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/current")
@@ -22,11 +24,19 @@ public class CurrentWeatherController {
 
     private final String BASE_URL= "https://api.openweathermap.org/data/2.5/weather";
 
-    @GetMapping("/city/{cityName}/{units}")
+    @GetMapping("/city/{cityName}")
     //response entity lets you have a more fine level of control over things like status, data, and headers in your responses
-    public ResponseEntity<?> getCurrentWeatherByCityPV (RestTemplate restTemplate, @PathVariable String cityName,@PathVariable String units){
+    public ResponseEntity<?> getCurrentWeatherByCityPV (RestTemplate restTemplate, @PathVariable String cityName){
 
         try {
+
+            String units = "imperial";
+            HashMap<String, String> validationErrors = WeatherValidation.validateQuery(cityName, units);
+
+            //if validation fails in any way, return error message(s)
+            if(validationErrors.size() !=0){
+                return ResponseEntity.badRequest().body(validationErrors);
+            }
             String apiKey = env.getProperty("OW_API_KEY");
             String queryString = "?q=" + cityName + "&appid=" + apiKey + "&units=imperial";
             String openWeatherURL = BASE_URL + queryString;
@@ -61,23 +71,7 @@ public class CurrentWeatherController {
             @RequestParam(defaultValue = "imperial") String units){
 
         try {
-            ArrayList<String> validationErrors = new ArrayList<>();
-//            Validation- name
-//            name cant be blank
-            if(cityName.trim().equals("")){
-                validationErrors.add("City name required");
-
-            } else if (!cityName.replaceAll("[^a-zA-z -]", "").equals(cityName)
-            ){
-//            name should not include special char/num
-            validationErrors.add("Invalid city name");
-            }
-
-//            validation- units
-//            is it metric or imperial
-              if(!units.equals("metric") && !units.equals("imperial")) {
-                  validationErrors.add("units must be in metric or imperial");
-              }
+            HashMap<String, String> validationErrors = WeatherValidation.validateQuery(cityName, units);
 
               //if validation fails in any way, return error message(s)
               if(validationErrors.size() !=0){
