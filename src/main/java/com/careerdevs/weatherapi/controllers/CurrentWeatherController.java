@@ -60,7 +60,7 @@ public class CurrentWeatherController {
     }
 
 
-    //http://localhost:8080/api/current/current?name=boston&units=imperial
+    //http:localhost:8080/api/current/current?name=boston&units=imperial
 
     @GetMapping("/city")
     //response entity lets you have a more fine level of control over things like status, data, and headers in your responses
