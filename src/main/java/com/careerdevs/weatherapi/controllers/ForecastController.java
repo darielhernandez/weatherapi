@@ -44,10 +44,10 @@ public class ForecastController {
 //            return ResponseEntity.ok(report);
             return ResponseEntity.ok(owRes.createReport(units));
 
-            }catch (HttpClientErrorException.NotFound e){
+        }catch (HttpClientErrorException.NotFound e){
             return ResponseEntity.status(404).body("City Not Found: " + city);
 
-            }catch (Exception e){
+        }catch (Exception e){
             System.out.println(e);
             System.out.println(e.getClass());
             return ResponseEntity.internalServerError().body(e.getMessage());
