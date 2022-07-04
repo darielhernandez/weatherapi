@@ -24,11 +24,9 @@ public class ForecastController {
 
     @GetMapping("/city/{city}")
     public ResponseEntity<?> getForecastByCityPV (RestTemplate restTemplate, @PathVariable String city){
-
         try{
             String units= "imperial";
             HashMap<String, String> validationErrors = WeatherValidation.validateQuery(city, units);
-
             //if validation fails in any way, return error message(s)
             if(validationErrors.size() !=0){
                 return ResponseEntity.badRequest().body(validationErrors);
@@ -57,12 +55,7 @@ public class ForecastController {
     }
 
     @GetMapping("/city")
-    public ResponseEntity<?> getForecastByCityReqParams (
-            RestTemplate restTemplate,
-            @RequestParam(value= "name") String city,
-            @RequestParam(defaultValue = "imperial") String units
-            ){
-
+    public ResponseEntity<?> getForecastByCityReqParams (RestTemplate restTemplate, @RequestParam(value= "name") String city, @RequestParam(defaultValue = "imperial") String units){
         try{
             HashMap<String, String> validationErrors = WeatherValidation.validateQuery(city, units);
 
