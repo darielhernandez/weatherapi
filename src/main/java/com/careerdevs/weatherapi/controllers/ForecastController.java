@@ -55,16 +55,23 @@ public class ForecastController {
     }
 
     @GetMapping("/city")
-    public ResponseEntity<?> getForecastByCityReqParams (RestTemplate restTemplate, @RequestParam(value= "name") String city, @RequestParam(defaultValue = "imperial") String units){
+    public ResponseEntity<?> getForecastByCityReqParams (RestTemplate restTemplate, @RequestParam(value= "name") String city, @RequestParam(defaultValue = "imperial") String units, @RequestParam(defaultValue = "40") String count){
         try{
             HashMap<String, String> validationErrors = WeatherValidation.validateQuery(city, units);
+
+            //validate count is a number
+            if(!count.replaceAll("[^0-9]", "").equals(count)){
+                validationErrors.put("count", "Count must be a number");
+            } else if (Integer.parseInt(count) < 1 || Integer.parseInt(count) > 40){
+                validationErrors.put("count", "Count must be between 1-40");
+            }
 
             //if validation fails in any way, return error message(s)
             if(validationErrors.size() !=0){
                 return ResponseEntity.badRequest().body(validationErrors);
             }
             String apiKey= env.getProperty("OW_API_KEY");
-            String queryString= "?q=" + city + "&units=" + units + "&appid=" +  apiKey;
+            String queryString= "?q=" + city + "&units=" + units + "&appid=" +  apiKey + "&cnt=" + count;
             String url = BASE_URL +queryString;
             Forecast owRes = restTemplate.getForObject(url, Forecast.class);
 

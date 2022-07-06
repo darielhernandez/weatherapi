@@ -9,6 +9,8 @@ public class ForecastReport {
     private final String cityName;
     private final String country;
     private final int population;
+    private final CurrentWeather.Coords coords;
+    private final int reportsCount;
 //    private final ForecastReportEntry[] reports;
     private final ArrayList<ForecastReportEntry> reports;
 
@@ -16,7 +18,8 @@ public class ForecastReport {
         cityName= forecast.getCity().getName();
         country= forecast.getCity().getCountry();
         population= forecast.getCity().getPopulation();
-
+        this.coords= forecast.getCity().getCoord();
+        reportsCount= forecast.getList().length;
 //        reports = new ForecastReportEntry[forecast.getList().length];
             reports = new ArrayList<>();
 
@@ -33,12 +36,31 @@ public class ForecastReport {
         private final String temp;
         private final String percentageOfPrecipitation;
 
+
+        public String getDateTime() {
+            return dateTime;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getTemp() {
+            return temp;
+        }
+
+        public String getPercentageOfPrecipitation() {
+            return percentageOfPrecipitation;
+        }
+
         public ForecastReportEntry(ForecastWeatherData wd, String units) {
             description = wd.getWeather()[0].getMain() + " - " + wd.getWeather()[0].getDescription();
             dateTime= wd.getDateTime();
             temp = wd.getMain().getTemp() + "°" + (units.equals("imperial") ? "F":"C");
-
             percentageOfPrecipitation = (wd.getPop() * 100) + "%";
+//            coords=
+
+
         }
     }
 
@@ -50,11 +72,18 @@ public class ForecastReport {
         return country;
     }
 
+    public int getReportsCount() {
+        return reportsCount;
+    }
+
     public int getPopulation() {
         return population;
     }
 
-//    public ForecastReportEntry[] getReports() {
+    public CurrentWeather.Coords getCoords() {
+        return coords;
+    }
+    //    public ForecastReportEntry[] getReports() {
 //        return reports;
 //    }
 
