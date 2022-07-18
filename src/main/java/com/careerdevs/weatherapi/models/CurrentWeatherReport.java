@@ -1,6 +1,16 @@
 package com.careerdevs.weatherapi.models;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class CurrentWeatherReport {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
 
     private String name;
     private String main;
@@ -14,6 +24,10 @@ public class CurrentWeatherReport {
     private float humidity;
     private float lat;
     private float lon;
+
+    public CurrentWeatherReport(){
+
+    }
 
     public CurrentWeatherReport(
             String name,

@@ -29,4 +29,21 @@ public class WeatherValidation {
         return validationErrors;
 
     }
+
+
+    public static HashMap<String , String> validateQueryID (String id){
+
+        HashMap<String, String> validationErrors = new HashMap<>();
+
+//            Validation- id (make sure it is a long)
+        try{
+            Long.parseLong(id);
+        } catch (NumberFormatException e){
+            validationErrors.put("id", "Id is invalid");
+        }
+
+
+        return validationErrors;
+
+    }
 }

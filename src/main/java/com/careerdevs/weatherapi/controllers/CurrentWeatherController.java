@@ -3,6 +3,7 @@ package com.careerdevs.weatherapi.controllers;
 
 import com.careerdevs.weatherapi.models.CurrentWeather;
 import com.careerdevs.weatherapi.models.CurrentWeatherReport;
+import com.careerdevs.weatherapi.repositories.CurrentReportRepository;
 import com.careerdevs.weatherapi.validation.WeatherValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -23,6 +24,9 @@ public class CurrentWeatherController {
     private Environment env;
 
     private final String BASE_URL= "https://api.openweathermap.org/data/2.5/weather";
+
+    @Autowired
+    private CurrentReportRepository currentReportRepo;
 
     @GetMapping("/city/{cityName}")
     //response entity lets you have a more fine level of control over things like status, data, and headers in your responses
@@ -66,9 +70,9 @@ public class CurrentWeatherController {
     //response entity lets you have a more fine level of control over things like status, data, and headers in your responses
     public ResponseEntity<?> getCurrentWeatherByCityRP (
             RestTemplate restTemplate,
-            @RequestParam String name,
             @RequestParam(value= "name") String cityName,
-            @RequestParam(defaultValue = "imperial") String units){
+            @RequestParam(defaultValue = "imperial") String units)
+    {
 
         try {
             HashMap<String, String> validationErrors = WeatherValidation.validateQuery(cityName, units);
@@ -77,6 +81,44 @@ public class CurrentWeatherController {
               if(validationErrors.size() !=0){
                   return ResponseEntity.badRequest().body(validationErrors);
               }
+
+            String apiKey = env.getProperty("OW_API_KEY");
+            String queryString = "?q=" + cityName + "&appid=" + apiKey + "&units=imperial" + units;
+            String openWeatherURL = BASE_URL + queryString;
+
+            CurrentWeather owRes = restTemplate.getForObject(openWeatherURL, CurrentWeather.class);
+            assert owRes!=null;
+
+            //upload to the database
+            CurrentWeatherReport saveReport = currentReportRepo.save(owRes.createReport(units));
+
+            return ResponseEntity.ok(owRes.createReport(units));
+
+        }catch (HttpClientErrorException.NotFound e){// cityName validation
+            return ResponseEntity.status(404).body("City Not Found: " + cityName);
+
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            System.out.println(e.getClass());
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
+    }
+
+    @PostMapping("/city")
+    public ResponseEntity<?> uploadCurrentWeatherByCityRP (
+            RestTemplate restTemplate,
+            @RequestParam(value= "name") String cityName,
+            @RequestParam(defaultValue = "imperial") String units)
+    {
+
+        try {
+            HashMap<String, String> validationErrors = WeatherValidation.validateQuery(cityName, units);
+
+            //if validation fails in any way, return error message(s)
+            if(validationErrors.size() !=0){
+                return ResponseEntity.badRequest().body(validationErrors);
+            }
 
             String apiKey = env.getProperty("OW_API_KEY");
             String queryString = "?q=" + cityName + "&appid=" + apiKey + "&units=imperial" + units;
