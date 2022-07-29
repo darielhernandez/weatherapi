@@ -90,7 +90,7 @@ public class CurrentWeatherController {
             assert owRes!=null;
 
             //upload to the database
-            CurrentWeatherReport saveReport = currentReportRepo.save(owRes.createReport(units));
+//            CurrentWeatherReport saveReport = currentReportRepo.save(owRes.createReport(units));
 
             return ResponseEntity.ok(owRes.createReport(units));
 
