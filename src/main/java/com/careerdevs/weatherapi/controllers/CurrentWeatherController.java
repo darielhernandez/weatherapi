@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/current")
@@ -64,7 +62,7 @@ public class CurrentWeatherController {
     }
 
 
-    //http:localhost:8080/api/current/current?name=boston&units=imperial
+    //http://localhost:8080/api/current/current?name=boston&units=imperial
 
     @GetMapping("/city")
     //response entity lets you have a more fine level of control over things like status, data, and headers in your responses
@@ -88,9 +86,6 @@ public class CurrentWeatherController {
 
             CurrentWeather owRes = restTemplate.getForObject(openWeatherURL, CurrentWeather.class);
             assert owRes!=null;
-
-            //upload to the database
-//            CurrentWeatherReport saveReport = currentReportRepo.save(owRes.createReport(units));
 
             return ResponseEntity.ok(owRes.createReport(units));
 
@@ -126,7 +121,12 @@ public class CurrentWeatherController {
 
             CurrentWeather owRes = restTemplate.getForObject(openWeatherURL, CurrentWeather.class);
             assert owRes!=null;
-            return ResponseEntity.ok(owRes.createReport(units));
+
+            //upload to the database
+            CurrentWeatherReport saveReport = currentReportRepo.save(owRes.createReport(units));
+
+            return ResponseEntity.ok(saveReport);
+//            return ResponseEntity.ok(owRes.createReport(units));
 
         }catch (HttpClientErrorException.NotFound e){// cityName validation
             return ResponseEntity.status(404).body("City Not Found: " + cityName);
@@ -138,5 +138,45 @@ public class CurrentWeatherController {
         }
 
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllCurrentWeatherReports () {
+        try {
+            List<CurrentWeatherReport> allReports = currentReportRepo.findAll();
+            return ResponseEntity.ok(allReports);
+
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            System.out.println(e.getClass());
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+    @GetMapping("/id/{id}")
+    public ResponseEntity<?> getAllCurrentWeatherReportById (@PathVariable String id) {
+        try {
+
+            HashMap<String, String> validationErrors = WeatherValidation.validateQueryID(id);
+
+            //if validation fails in any way, return error message(s)
+            if(validationErrors.size() !=0){
+                return ResponseEntity.badRequest().body(validationErrors);
+            }
+
+            Optional<CurrentWeatherReport> currentReport = currentReportRepo.findById(Long.parseLong(id));
+
+            if (currentReport.isEmpty()){
+                ResponseEntity.status(404).body("Current Report Not Found With ID" + id);
+            }
+
+            return ResponseEntity.ok(currentReport);
+
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            System.out.println(e.getClass());
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
+    }
+
 
 }

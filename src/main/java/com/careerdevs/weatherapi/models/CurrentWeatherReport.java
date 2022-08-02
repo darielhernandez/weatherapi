@@ -1,5 +1,7 @@
 package com.careerdevs.weatherapi.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,6 +12,7 @@ public class CurrentWeatherReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private long id;
 
     private String name;
@@ -49,6 +52,10 @@ public class CurrentWeatherReport {
         this.main = weather.getMain();
         description = weather.getDescription();
 
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getName() {
